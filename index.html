@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Polling App</title>
+</head>
+<body>
+    <h1>Real-time Polling App</h1>
+    <div id="poll"></div>
+    <script>
+        async function fetchPoll() {
+            const response = await fetch('/polls/poll_1');
+            const poll = await response.json();
+            displayPoll(poll);
+        }
+
+        function displayPoll(poll) {
+            const pollDiv = document.getElementById('poll');
+            pollDiv.innerHTML = `<h2>${poll.question}</h2>`;
+            poll.options.forEach((option, index) => {
+                pollDiv.innerHTML += `
+                    <div>
+                        <button onclick="vote('${option}')">${option}</button>
+                        <span id="votes_${index}">${poll.votes[index]}</span>
+                    </div>
+                `;
+            });
+        }
+
+        async function vote(option) {
+            const response = await fetch('/polls/poll_1/vote', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ option })
+            });
+            const poll = await response.json();
+            updateVotes(poll.votes);
+        }
+
+        function updateVotes(votes) {
+            votes.forEach((voteCount, index) => {
+                document.getElementById(`votes_${index}`).textContent = voteCount;
+            });
+        }
+
+        fetchPoll();
+    </script>
+</body>
+</html>
